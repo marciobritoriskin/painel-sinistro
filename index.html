@@ -751,13 +751,26 @@
     font-weight: 800; color: var(--tv-gold); line-height: 1.05; }
   .tv-eco-hero .l { display: block; font-family: 'Outfit', system-ui, sans-serif;
     font-size: 13px; font-weight: 500; color: var(--tv-mute); margin-top: 3px; }
-  .tv-eco-serie { display: flex; align-items: flex-end; gap: 6px; height: 62px; margin-top: 10px; }
+  /* Valor escrito em cima de cada barra (28/09/2026): o title (tooltip) nunca
+     aparece numa TV sem mouse, entao so a altura relativa sobrava — e altura
+     sem escala ao lado nao diz quanto e quanto. O numero mora DENTRO de `i`
+     (a barra), ancorado no topo dela (`bottom:100%`), pra subir e descer
+     junto com a barra em vez de ficar numa faixa fixa. `padding-top` no
+     `.tv-eco-serie` abre o respiro pro numero da barra mais alta (a de
+     100%) nao colidir com o que vem acima no cartao. A cor dos meses
+     antigos usa rgba, NAO `opacity`: opacity no elemento-pai apagaria o
+     numero junto com a barra, e ele tem de continuar legivel mesmo apagado. */
+  .tv-eco-serie { display: flex; align-items: flex-end; gap: 8px; height: 58px;
+    margin-top: 26px; padding-top: 18px; }
   .tv-eco-serie .c { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
     align-items: center; height: 100%; }
   .tv-eco-serie .c .p { flex: 1; width: 100%; display: flex; align-items: flex-end; min-height: 0; }
-  .tv-eco-serie .c i { display: block; width: 100%; background: var(--tv-gold);
-    border-radius: 4px 4px 0 0; opacity: 0.55; }
-  .tv-eco-serie .c:last-child i { opacity: 1; }
+  .tv-eco-serie .c i { display: block; width: 100%; background: rgba(180, 83, 9, 0.55);
+    border-radius: 4px 4px 0 0; position: relative; }
+  .tv-eco-serie .c:last-child i { background: var(--tv-gold); }
+  .tv-eco-serie .c i .v { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+    white-space: nowrap; font-size: 11.5px; font-weight: 700; color: var(--tv-mute); padding-bottom: 3px; }
+  .tv-eco-serie .c:last-child i .v { color: var(--tv-gold); font-weight: 800; }
   .tv-eco-serie .c .m { font-size: 11px; color: var(--tv-mute); margin-top: 3px; }
   .tv-eco-aberto { font-size: 13px; color: var(--tv-mute); margin-top: 9px; }
   .tv-eco-aberto b { color: var(--tv-ink); }
@@ -5594,8 +5607,13 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
         + fmtPct(u.pct, 0) + ' do orçado</span></div>'
       + '<div class="tv-eco-serie">' + serie.map(function (m) {
           const alt = Math.max(8, (m.economia / maxS) * 100);
+          // O VALOR ESCRITO NA BARRA, NAO SO NO title (28/09/2026): title e
+          // tooltip de mouse, e a parede nao tem mouse — o numero ficava
+          // invisivel pra quem le de longe, so a altura relativa das barras
+          // sobrava, e altura sem escala ao lado nao diz quanto e quanto.
           return '<div class="c" title="' + m.rotulo + ': ' + fmtR(m.economia) + ' (' + m.pct + '% do orçado)">'
-            + '<div class="p"><i style="height:' + alt.toFixed(0) + '%"></i></div>'
+            + '<div class="p"><i style="height:' + alt.toFixed(0) + '%">'
+            + '<span class="v">' + fmtRk(m.economia) + '</span></i></div>'
             + '<span class="m">' + m.rotulo.slice(0, 3) + '</span></div>';
         }).join('') + '</div>'
       + (dados.emAberto && dados.emAberto.casos
