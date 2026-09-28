@@ -1667,7 +1667,19 @@
     <div class="tv-heroes tv-heroes-rodar tv-heroes-4" id="tvIndRodar"></div>
     <div class="tv-foot" id="tvIndNota"></div>
 
-    <!-- BLOCO 1 — os eixos da operação de HOJE, em número grande -->
+    <!-- ===== RODÍZIO RISKIN/RODAR (28/09/2026) =====================
+         Pedido do Marcio, depois de testar a parede pelo Samsung Internet da
+         TV: com as DUAS operações sempre visíveis, a Carga por Responsável e
+         o Valor economizado (que já eram os blocos mais altos) forçavam um
+         zoom de 0,68 numa tela de 936px úteis (a barra do navegador come o
+         resto dos 1080) — a letra miúda (10,5-11,5px naturais) caía a uns
+         7-8px efetivos, ilegível de longe. Em vez de tirar informação da
+         parede (só sobraria na aba clicável), as DUAS ficam no DOM e o
+         JS alterna qual aparece — cada fase ganha quase o dobro do espaço
+         vertical que tinha, e o ajuste de zoom já existente faz o resto.
+         BLOCO 0 (placar) e as duas faixas .tv-foot continuam sempre visíveis:
+         são compactas e dizem "como estamos" mesmo no meio de uma troca. -->
+    <div class="tv-fase tv-fase-riskin">
     <div class="tv-op riskin">
       <span class="tv-op-logo" role="img" aria-label="Riskin"></span>
       <span class="tv-op-n">Riskin</span>
@@ -1760,11 +1772,13 @@
       </div>
 
     </div>
+    </div><!-- /.tv-fase-riskin -->
 
     <!-- A OPERACAO DA RODAR, nas MESMAS tres perguntas da Riskin. A faixa de
          quatro números (estoque · tempo · vazão · dinheiro) saiu em 31/08/2026:
          estoque e exposição reapareceram no cabeçalho dos painéis abaixo, e
          ciclo e vazão do pipe ficaram na aba Rodar, onde têm o gráfico inteiro. -->
+    <div class="tv-fase tv-fase-rodar">
     <div class="tv-op rodar">
       <span class="tv-op-logo" role="img" aria-label="Rodar Mutual"></span>
       <span class="tv-op-n">Rodar</span>
@@ -1790,6 +1804,7 @@
       </div>
 
     </div>
+    </div><!-- /.tv-fase-rodar -->
 
     <div class="tv-foot" id="tvFoot"></div>
 
@@ -6116,6 +6131,27 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
     // aparece, porque o envelope de la ja zera — no arquivo local, aparece.
     document.body.style.margin = '0';
     document.body.style.padding = '0';
+    // ---- Rodizio Riskin/Rodar (28/09/2026) ---------------------------------
+    // So uma fase por vez na parede — ver o comentario "RODIZIO RISKIN/RODAR"
+    // no HTML de `.tv-fase-riskin`/`.tv-fase-rodar`: cada fase ganha quase o
+    // dobro do espaco vertical que tinha com as duas juntas, e o zoom sobe
+    // junto. `?rodizio=0` desliga (mostra as duas, como antes de 28/09/2026);
+    // `?rodizio=Ns` troca o intervalo (padrao 15s). Roda so em modo TV: na aba
+    // clicavel do navegador as duas operacoes continuam sempre visiveis.
+    const faseRiskin = document.querySelector('.tv-fase-riskin');
+    const faseRodar = document.querySelector('.tv-fase-rodar');
+    if (faseRiskin && faseRodar && params.get('rodizio') !== '0') {
+      const intervaloMs = (parseInt(params.get('rodizio'), 10) || 15) * 1000;
+      let mostrandoRiskin = true;
+      const alternarFase = function(){
+        faseRiskin.style.display = mostrandoRiskin ? '' : 'none';
+        faseRodar.style.display = mostrandoRiskin ? 'none' : '';
+        mostrandoRiskin = !mostrandoRiskin;
+        ajustarParaTela();
+      };
+      alternarFase();
+      setInterval(alternarFase, intervaloMs);
+    }
     ajustarParaTela();
     // Reajusta quando a TV muda de resolucao ou quando as fontes terminam de
     // carregar (fonte trocada muda a altura e reintroduziria a rolagem).
@@ -6164,7 +6200,11 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
         'padding:2px 6px;border-radius:4px;pointer-events:none;';
       document.body.appendChild(el);
     }
-    const rotulo = document.querySelector('.tv-row .m, .tv-et .n');
+    // .tv-row/.tv-et vivem so na gaveta (hidden) desde a reforma de 20/09 —
+    // medir eles aqui seria medir texto que ninguem ve. .dp-rg-det (a linha
+    // de detalhe da Carga por Responsavel) e a menor letra REALMENTE visivel
+    // na parede hoje.
+    const rotulo = document.querySelector('.tv-fase:not([style*="display: none"]) .dp-rg-det, .dp-rg-det, .tv-op-d');
     const rotuloPx = rotulo ? (parseFloat(getComputedStyle(rotulo).fontSize) * zoomAtual).toFixed(1) : '?';
     el.textContent = 'viewport ' + window.innerWidth + 'x' + window.innerHeight +
       ' · zoom ' + zoomAtual.toFixed(3) +
