@@ -751,27 +751,32 @@
     font-weight: 800; color: var(--tv-gold); line-height: 1.05; }
   .tv-eco-hero .l { display: block; font-family: 'Outfit', system-ui, sans-serif;
     font-size: 13px; font-weight: 500; color: var(--tv-mute); margin-top: 3px; }
-  /* Valor escrito em cima de cada barra (28/09/2026): o title (tooltip) nunca
-     aparece numa TV sem mouse, entao so a altura relativa sobrava — e altura
-     sem escala ao lado nao diz quanto e quanto. O numero mora DENTRO de `i`
-     (a barra), ancorado no topo dela (`bottom:100%`), pra subir e descer
-     junto com a barra em vez de ficar numa faixa fixa. `padding-top` no
-     `.tv-eco-serie` abre o respiro pro numero da barra mais alta (a de
-     100%) nao colidir com o que vem acima no cartao. A cor dos meses
-     antigos usa rgba, NAO `opacity`: opacity no elemento-pai apagaria o
-     numero junto com a barra, e ele tem de continuar legivel mesmo apagado. */
+  /* Emphasis, nao 6 barras douradas (skill de dataviz, 28/09/2026): so UM mes
+     e "o ponto" — o corrente, ja anunciado no numero grande — o resto e
+     CONTEXTO pra mostrar a forma da tendencia. Contexto vira cinza neutro
+     (#7f8da1, >=3:1 contra o cartao branco), nao um dourado apagado: dourado
+     clarinho ainda le como "a mesma cor", so mais fraca, e a barra corrente
+     nao se destacava de verdade. A barra tambem para de esticar 100% da
+     coluna (virava bloco grosso) — fica fina (18px), o ar em volta e que
+     separa uma da outra, nao mais o gap sozinho.
+     Rotulo (quando existe — so extremos, ver JS) mora DENTRO de `i`,
+     ancorado no topo dela (`bottom:100%`), pra subir/descer junto com a
+     barra. `padding-top` no `.tv-eco-serie` abre respiro pro rotulo da
+     barra mais alta nao colidir com o que vem acima no cartao. */
   .tv-eco-serie { display: flex; align-items: flex-end; gap: 8px; height: 58px;
     margin-top: 26px; padding-top: 18px; }
   .tv-eco-serie .c { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
     align-items: center; height: 100%; }
-  .tv-eco-serie .c .p { flex: 1; width: 100%; display: flex; align-items: flex-end; min-height: 0; }
-  .tv-eco-serie .c i { display: block; width: 100%; background: rgba(180, 83, 9, 0.55);
+  .tv-eco-serie .c .p { flex: 1; width: 100%; display: flex; align-items: flex-end;
+    justify-content: center; min-height: 0; }
+  .tv-eco-serie .c i { display: block; width: 18px; background: #7f8da1;
     border-radius: 4px 4px 0 0; position: relative; }
-  .tv-eco-serie .c:last-child i { background: var(--tv-gold); }
+  .tv-eco-serie .c:last-child i { background: var(--tv-gold); width: 22px; }
   .tv-eco-serie .c i .v { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
     white-space: nowrap; font-size: 11.5px; font-weight: 700; color: var(--tv-mute); padding-bottom: 3px; }
   .tv-eco-serie .c:last-child i .v { color: var(--tv-gold); font-weight: 800; }
   .tv-eco-serie .c .m { font-size: 11px; color: var(--tv-mute); margin-top: 3px; }
+  .tv-eco-serie .c:last-child .m { color: var(--tv-ink); font-weight: 700; }
   .tv-eco-aberto { font-size: 13px; color: var(--tv-mute); margin-top: 9px; }
   .tv-eco-aberto b { color: var(--tv-ink); }
   .tv-eco-sem { font-size: 14px; color: var(--tv-mute); line-height: 1.5; padding: 6px 0; }
@@ -5601,19 +5606,29 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
     const u = dados.ultimo;
     const serie = (dados.serie || []).slice(-6);
     const maxS = serie.reduce(function (m, x) { return Math.max(m, x.economia); }, 0) || 1;
+    // ROTULO SELETIVO, NAO EM TODA BARRA (skill de dataviz, 28/09/2026): a
+    // primeira versao escrevia o valor nas 6 barras e ficou "estranha" —
+    // numero em todo ponto vira ruido e ninguem le. O numero do mes CORRENTE
+    // ja esta no numero grande, ali em cima; repeti-lo na ultima barra e
+    // redundante. O que falta pro leitor e a ESCALA dos meses de CONTEXTO: só
+    // o maior e o menor entre eles ganham rotulo — as barras do meio contam
+    // a forma da tendencia sem gritar numero nenhum.
+    const contexto = serie.slice(0, -1);
+    let idxMax = -1, idxMin = -1;
+    contexto.forEach(function (m, i) {
+      if (idxMax === -1 || m.economia > contexto[idxMax].economia) idxMax = i;
+      if (idxMin === -1 || m.economia < contexto[idxMin].economia) idxMin = i;
+    });
     caixa.innerHTML =
       '<div class="tv-eco-hero">' + fmtRk(u.economia)
         + '<span class="l">' + u.rotulo + ' fechado · ' + u.casos + ' casos · '
         + fmtPct(u.pct, 0) + ' do orçado</span></div>'
-      + '<div class="tv-eco-serie">' + serie.map(function (m) {
+      + '<div class="tv-eco-serie">' + serie.map(function (m, i) {
           const alt = Math.max(8, (m.economia / maxS) * 100);
-          // O VALOR ESCRITO NA BARRA, NAO SO NO title (28/09/2026): title e
-          // tooltip de mouse, e a parede nao tem mouse — o numero ficava
-          // invisivel pra quem le de longe, so a altura relativa das barras
-          // sobrava, e altura sem escala ao lado nao diz quanto e quanto.
+          const ehExtremo = i === idxMax || i === idxMin;
+          const rotuloValor = ehExtremo ? '<span class="v">' + fmtRk(m.economia) + '</span>' : '';
           return '<div class="c" title="' + m.rotulo + ': ' + fmtR(m.economia) + ' (' + m.pct + '% do orçado)">'
-            + '<div class="p"><i style="height:' + alt.toFixed(0) + '%">'
-            + '<span class="v">' + fmtRk(m.economia) + '</span></i></div>'
+            + '<div class="p"><i style="height:' + alt.toFixed(0) + '%">' + rotuloValor + '</i></div>'
             + '<span class="m">' + m.rotulo.slice(0, 3) + '</span></div>';
         }).join('') + '</div>'
       + (dados.emAberto && dados.emAberto.casos
