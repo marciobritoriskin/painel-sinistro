@@ -156,8 +156,12 @@
   .dp-leg-i { display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; color: var(--ink-soft); }
   .dp-leg-i i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
   .dp-rg { border-top: 1px solid var(--hair); }
+  /* Padding de 3px/2px, nao 7px/5px (28/09/2026): a Carga por Responsavel e
+     nova (20-27/09) e nao tinha passado pelo aperto que .tv-row/.tv-et ja
+     levaram — cada pessoa a mais na lista custava 12px de altura natural
+     so de respiro, multiplicado antes do zoom da parede. */
   .dp-rg-row { display: grid; grid-template-columns: 74px 1fr 30px; gap: 8px;
-    align-items: center; padding: 7px 0 5px; border-bottom: 1px solid var(--hair); }
+    align-items: center; padding: 3px 0 2px; border-bottom: 1px solid var(--hair); }
   .dp-rg-row .n { font-size: 11.5px; font-weight: 600; color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* O TRILHO É CINZA, NÃO AZUL: os segmentos são todos da rampa azul, e um
@@ -845,7 +849,7 @@
      permitiu o pedido de 21/08: mapa grande na parte de cima do quadro e as
      informacoes embaixo dele, empilhadas. Com duas fileiras nao caberia —
      a silhueta ficaria menor que os proprios rotulos. */
-  .tv-card { background: var(--tv-card); color: var(--tv-ink); border-radius: 16px; padding: 11px 15px 11px;
+  .tv-card { background: var(--tv-card); color: var(--tv-ink); border-radius: 16px; padding: 8px 15px 8px;
     border: 1px solid var(--tv-line); box-shadow: 0 1px 4px rgba(7, 27, 64, 0.07);
     /* Coluna flex para o conteudo poder ocupar a altura da fileira. Com o mapa
        esticado por duas fileiras, os cartoes curtos ao lado herdam essa altura
@@ -870,7 +874,7 @@
      (#eef0f5, o filete) e sumia no cartao branco: a celula ficava vazia, e
      celula vazia numa parede se le como zero. Em --tv-mute ele diz o que e --
      mes sem base, e nao mes de valor zero. */
-  .tv-card-t { font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tv-mute); margin-bottom: 8px; }
+  .tv-card-t { font-size: 13.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tv-mute); margin-bottom: 5px; }
 
   /* ===== MESA-13-09-2026-css — TABELA DE ETAPAS E CARTAO EM EVIDENCIA =====
 
@@ -6131,16 +6135,18 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
     // aparece, porque o envelope de la ja zera — no arquivo local, aparece.
     document.body.style.margin = '0';
     document.body.style.padding = '0';
-    // ---- Rodizio Riskin/Rodar (28/09/2026) ---------------------------------
-    // So uma fase por vez na parede — ver o comentario "RODIZIO RISKIN/RODAR"
-    // no HTML de `.tv-fase-riskin`/`.tv-fase-rodar`: cada fase ganha quase o
-    // dobro do espaco vertical que tinha com as duas juntas, e o zoom sobe
-    // junto. `?rodizio=0` desliga (mostra as duas, como antes de 28/09/2026);
-    // `?rodizio=Ns` troca o intervalo (padrao 15s). Roda so em modo TV: na aba
-    // clicavel do navegador as duas operacoes continuam sempre visiveis.
+    // ---- Rodizio Riskin/Rodar (28/09/2026, DESLIGADO por padrao) -----------
+    // Testado no mesmo dia: a troca em si lia como "sumiu informacao" pra
+    // quem olha a parede de relance (o Marcio pediu pra CONGELAR, mostrando
+    // as duas operacoes sempre, e brigar pela fonte por outro caminho — ver
+    // o comentario "RODIZIO RISKIN/RODAR" no HTML de `.tv-fase-riskin` pro
+    // raciocinio original). Fica desligado a nao ser que a URL peca
+    // explicitamente `?rodizio=Ns` (liga, troca a cada N segundos). Roda so
+    // em modo TV: na aba clicavel do navegador as duas operacoes continuam
+    // sempre visiveis, com ou sem esse parametro.
     const faseRiskin = document.querySelector('.tv-fase-riskin');
     const faseRodar = document.querySelector('.tv-fase-rodar');
-    if (faseRiskin && faseRodar && params.get('rodizio') !== '0') {
+    if (faseRiskin && faseRodar && params.has('rodizio') && params.get('rodizio') !== '0') {
       const intervaloMs = (parseInt(params.get('rodizio'), 10) || 15) * 1000;
       let mostrandoRiskin = true;
       const alternarFase = function(){
