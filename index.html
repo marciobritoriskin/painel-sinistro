@@ -1679,7 +1679,7 @@
          vertical que tinha, e o ajuste de zoom já existente faz o resto.
          BLOCO 0 (placar) e as duas faixas .tv-foot continuam sempre visíveis:
          são compactas e dizem "como estamos" mesmo no meio de uma troca. -->
-    <div class="tv-fase tv-fase-riskin">
+    <div class="tv-fase-riskin">
     <div class="tv-op riskin">
       <span class="tv-op-logo" role="img" aria-label="Riskin"></span>
       <span class="tv-op-n">Riskin</span>
@@ -1778,7 +1778,7 @@
          quatro números (estoque · tempo · vazão · dinheiro) saiu em 31/08/2026:
          estoque e exposição reapareceram no cabeçalho dos painéis abaixo, e
          ciclo e vazão do pipe ficaram na aba Rodar, onde têm o gráfico inteiro. -->
-    <div class="tv-fase tv-fase-rodar">
+    <div class="tv-fase-rodar">
     <div class="tv-op rodar">
       <span class="tv-op-logo" role="img" aria-label="Rodar Mutual"></span>
       <span class="tv-op-n">Rodar</span>
@@ -6204,7 +6204,9 @@ var JUR_TRAVADOS = 0, JUR_ABERTOS = 0, JUR_SEM_RESP = 0;
     // medir eles aqui seria medir texto que ninguem ve. .dp-rg-det (a linha
     // de detalhe da Carga por Responsavel) e a menor letra REALMENTE visivel
     // na parede hoje.
-    const rotulo = document.querySelector('.tv-fase:not([style*="display: none"]) .dp-rg-det, .dp-rg-det, .tv-op-d');
+    const rotulo = document.querySelector(
+      '.tv-fase-riskin:not([style*="display: none"]) .dp-rg-det, ' +
+      '.tv-fase-rodar:not([style*="display: none"]) .dp-rg-det, .dp-rg-det, .tv-op-d');
     const rotuloPx = rotulo ? (parseFloat(getComputedStyle(rotulo).fontSize) * zoomAtual).toFixed(1) : '?';
     el.textContent = 'viewport ' + window.innerWidth + 'x' + window.innerHeight +
       ' · zoom ' + zoomAtual.toFixed(3) +
